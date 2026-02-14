@@ -1,0 +1,169 @@
+{
+  "name": "AI INTERSHIP READINESS SCANNER",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI INTERSHIP READINESS SCANNER",
+        "formDescription": "WE CHECK YOUR RESUME AND GRADE IT.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "NAME",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "EMAIL",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "TARGET JOB ROLE",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "RESUME",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "087e945b-051a-4a8e-a58b-e061e5c08282",
+      "name": "On form submission",
+      "webhookId": "89c48df3-704e-430a-8ac0-3bea587c39a2"
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "=You are an AI Internship Readiness Scanner.\n\nA student has submitted the following details:\n\nName: {{$json.name}}\nSkills: {{$json.skills}}\nProjects: {{$json.projects}}\nExperience: {{$json.experience}}\n\nAnalyze the student and give JUST POINTS VERY SHORT:\n\n1. Readiness Score (out of 10)\n2. Strengths\n3. Weaknesses\n4. Suggestions to improve\n5. Final verdict (Ready / Almost Ready / Not Ready)",
+        "inputType": "binary",
+        "binaryPropertyName": "RESUME",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "672c9255-b13e-4290-82c7-3d4dd3b8d2f6",
+      "name": "Analyze document",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mdKBp2c11FL99vqK",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$node[\"Set\"].json[\"EMAIL\"]}}",
+        "subject": "hi",
+        "emailType": "text",
+        "message": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        0
+      ],
+      "id": "09072275-b99c-4c44-bf15-365f866a76a2",
+      "name": "Send a message",
+      "webhookId": "0ef3e959-dc67-4c0a-909b-e93a51d0ef41",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EINhQT7XfUyU7354",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ebd32a1d-9023-4d4c-9727-cf082cfa340e",
+              "name": "EMAIL",
+              "value": "={{ $json.EMAIL }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "07437281-dfc4-4cd6-bca5-1680dd4537b6",
+      "name": "Set"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "babcf758-0aa3-456f-823e-7798d872d10b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e4c7db07eef3202c602c6a2b2085e665ed1a4316ec1dac61c67a7684c5b1080d"
+  },
+  "id": "qdD19VQCJp8in5dG",
+  "tags": []
+}
